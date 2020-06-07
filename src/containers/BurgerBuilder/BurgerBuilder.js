@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import Aux from '../../hoc/Auxiliary/Auxiliary';
 import Burger from '../../components/Burger/Burger';
 import BuildControls from '../../components/Burger/BuildControls/BuildControls';
@@ -11,73 +11,69 @@ import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler';
 import { connect } from 'react-redux';
 import * as actions from '../../store/actions/';
 
-export class BurgerBuilder extends Component {
-    state = {
-        showSummary: false,
-    }
+const burgerBuilder = props => {
+    const [showSummary, setShowSummary] = useState(false)
 
-    componentDidMount() {
-        this.props.initIngredients();
-    }
+    useEffect(() => {
+        props.initIngredients();
+    }, []);
 
-    updateIngredientHandler = (type, add = true) => {
-        if ((!add && !this.props.ingredients[type]) || (add && this.props.ingredients[type] >= 3)) {
+    const updateIngredientHandler = (type, add = true) => {
+        if ((!add && !props.ingredients[type]) || (add && props.ingredients[type] >= 3)) {
             return;
         }
-        add ? this.props.addIngredient(type) : this.props.removeIngredient(type);
+        add ? props.addIngredient(type) : props.removeIngredient(type);
     }
 
-    isPurchasable = (ingredients) => {
+    const isPurchasable = (ingredients) => {
         return !!Object.keys(ingredients).find(item => ingredients[item] > 0);
     }
 
-    toggleModal = (state = false) => {
-        this.props.onSubmitIngredients();
-        if (this.props.isAuth) {
-            this.setState({ showSummary: state })
+    const toggleModal = (state = false) => {
+        props.onSubmitIngredients();
+        if (props.isAuth) {
+            setShowSummary(state)
         } else {
-            this.props.onSetAuthRedirectPath('/checkout');
-            this.props.history.push('/login');
+            props.onSetAuthRedirectPath('/checkout');
+            props.history.push('/login');
         }
     }
 
-    purchaseContinueHandler = () => {
-        this.props.onInitPurchase();
-        this.props.history.push('/checkout')
+    const purchaseContinueHandler = () => {
+        props.onInitPurchase();
+        props.history.push('/checkout')
     }
 
-    render() {
-        const orderSummary = (
-            <OrderSummary
-                ingredients={this.props.ingredients} close={this.toggleModal}
-                price={this.props.price}
-                cancel={this.toggleModal}
-                submit={this.purchaseContinueHandler} />
-        );
+    const orderSummary = (
+        <OrderSummary
+            ingredients={props.ingredients} close={toggleModal}
+            price={props.price}
+            cancel={toggleModal}
+            submit={purchaseContinueHandler} />
+    );
 
-        const burger = this.props.error ? <p>Cannot connect to server</p> :
-            this.props.ingredients ? (
-                <Aux>
-                    <Modal show={this.state.showSummary} close={this.toggleModal}>
-                        {orderSummary}
-                    </Modal>
-                    <Burger ingredients={this.props.ingredients} />
-                    <BuildControls
-                        ingredients={this.props.ingredients}
-                        change={this.updateIngredientHandler}
-                        price={this.props.price}
-                        disabled={!this.isPurchasable(this.props.ingredients)}
-                        isAuth={this.props.isAuth}
-                        order={this.toggleModal} />
-                </Aux>
-            ) : <Spinner />
-
-        return (
+    const burger = props.error ? <p>Cannot connect to server</p> :
+        props.ingredients ? (
             <Aux>
-                {burger}
+                <Modal show={showSummary} close={toggleModal}>
+                    {orderSummary}
+                </Modal>
+                <Burger ingredients={props.ingredients} />
+                <BuildControls
+                    ingredients={props.ingredients}
+                    change={updateIngredientHandler}
+                    price={props.price}
+                    disabled={!isPurchasable(props.ingredients)}
+                    isAuth={props.isAuth}
+                    order={toggleModal} />
             </Aux>
-        )
-    }
+        ) : <Spinner />
+
+    return (
+        <Aux>
+            {burger}
+        </Aux>
+    )
 }
 
 const mapStoreToProps = state => {
@@ -100,4 +96,4 @@ const mapDispatchToProps = dispatch => {
     }
 }
 
-export default connect(mapStoreToProps, mapDispatchToProps)(withErrorHandler(BurgerBuilder, axios));
+export default connect(mapStoreToProps, mapDispatchToProps)(withErrorHandler(burgerBuilder, axios));
