@@ -12,9 +12,10 @@ const Orders = React.lazy(() => import('./containers/Orderes/Orders'));
 const Logout = React.lazy(() => import('./containers/Auth/Logout/Logout'));
 
 const app = props => {
+  const {onTryAutoSignin} = props;
   useEffect(() => {
-    props.onTryAutoSignin();
-  }, []);
+    onTryAutoSignin();
+  }, [onTryAutoSignin]);
 
   let routes = (
     <Switch>

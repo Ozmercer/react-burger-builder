@@ -12,11 +12,12 @@ import { connect } from 'react-redux';
 import * as actions from '../../store/actions/';
 
 const burgerBuilder = props => {
-    const [showSummary, setShowSummary] = useState(false)
+    const [showSummary, setShowSummary] = useState(false);
+    const { initIngredients } = props;
 
     useEffect(() => {
-        props.initIngredients();
-    }, []);
+        initIngredients();
+    }, [initIngredients]);
 
     const updateIngredientHandler = (type, add = true) => {
         if ((!add && !props.ingredients[type]) || (add && props.ingredients[type] >= 3)) {
