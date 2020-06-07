@@ -19,7 +19,7 @@ const app = props => {
   let routes = (
     <Switch>
       <Route path="/build" component={BurgerBuilder} />
-      <Route path="/login" render={() => <Auth />} />
+      <Route path="/login" render={(props) => <Auth {...props} />} />
       <Redirect from='/' to="build" />
     </Switch>
   );
@@ -28,10 +28,10 @@ const app = props => {
     routes = (
       <Switch>
         <Route path="/build" component={BurgerBuilder} />
-        <Route path="/checkout" render={() => <Checkout />} />
-        <Route path="/orders" render={() => <Orders />} />
-        <Route path="/login" render={() => <Auth />} />
-        <Route path="/logout" render={() => <Logout />} />
+        <Route path="/checkout" render={(props) => <Checkout {...props} />} />
+        <Route path="/orders" render={(props) => <Orders {...props} />} />
+        <Route path="/login" render={(props) => <Auth {...props} />} />
+        <Route path="/logout" render={(props) => <Logout {...props} />} />
         <Redirect from='/' to="build" />
       </Switch>
     )
