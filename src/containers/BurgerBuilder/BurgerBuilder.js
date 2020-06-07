@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Aux from '../../hoc/Auxiliary/Auxiliary';
 import Burger from '../../components/Burger/Burger';
 import BuildControls from '../../components/Burger/BuildControls/BuildControls';
@@ -8,22 +8,38 @@ import OrderSummary from '../../components/Burger/OrderSummary/OrderSummary';
 import Spinner from '../../components/UI/Spinner/Spinner';
 import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler';
 
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import * as actions from '../../store/actions/';
 
 const burgerBuilder = props => {
     const [showSummary, setShowSummary] = useState(false);
-    const { initIngredients } = props;
+
+    const dispatch = useDispatch();
+
+    const ingredients = useSelector(state => state.burgerBuilder.ingredients);
+    const price = useSelector(state => state.burgerBuilder.price);
+    const error = useSelector(state => state.burgerBuilder.error);
+    const isAuth = useSelector(state => !!state.auth.token);
+
+    const addIngredient = (ingredient) => dispatch(actions.addIngredient(ingredient));
+    const removeIngredient = (ingredient) => dispatch(actions.removeIngredient(ingredient));
+    const initIngredients = useCallback(
+        () => dispatch(actions.initIngredients()),
+        [dispatch]
+    );
+    const onInitPurchase = () => dispatch(actions.purchaseInit());
+    const onSetAuthRedirectPath = (path) => dispatch(actions.setAuthRedirectPath(path));
+    const onSubmitIngredients = () => dispatch(actions.submitIngredients());
 
     useEffect(() => {
         initIngredients();
     }, [initIngredients]);
 
     const updateIngredientHandler = (type, add = true) => {
-        if ((!add && !props.ingredients[type]) || (add && props.ingredients[type] >= 3)) {
+        if ((!add && !ingredients[type]) || (add && ingredients[type] >= 3)) {
             return;
         }
-        add ? props.addIngredient(type) : props.removeIngredient(type);
+        add ? addIngredient(type) : removeIngredient(type);
     }
 
     const isPurchasable = (ingredients) => {
@@ -31,41 +47,41 @@ const burgerBuilder = props => {
     }
 
     const toggleModal = (state = false) => {
-        props.onSubmitIngredients();
-        if (props.isAuth) {
+        onSubmitIngredients();
+        if (isAuth) {
             setShowSummary(state)
         } else {
-            props.onSetAuthRedirectPath('/checkout');
+            onSetAuthRedirectPath('/checkout');
             props.history.push('/login');
         }
     }
 
     const purchaseContinueHandler = () => {
-        props.onInitPurchase();
+        onInitPurchase();
         props.history.push('/checkout')
     }
 
     const orderSummary = (
         <OrderSummary
-            ingredients={props.ingredients} close={toggleModal}
-            price={props.price}
+            ingredients={ingredients} close={toggleModal}
+            price={price}
             cancel={toggleModal}
             submit={purchaseContinueHandler} />
     );
 
-    const burger = props.error ? <p>Cannot connect to server</p> :
-        props.ingredients ? (
+    const burger = error ? <p>Cannot connect to server</p> :
+        ingredients ? (
             <Aux>
                 <Modal show={showSummary} close={toggleModal}>
                     {orderSummary}
                 </Modal>
-                <Burger ingredients={props.ingredients} />
+                <Burger ingredients={ingredients} />
                 <BuildControls
-                    ingredients={props.ingredients}
+                    ingredients={ingredients}
                     change={updateIngredientHandler}
-                    price={props.price}
-                    disabled={!isPurchasable(props.ingredients)}
-                    isAuth={props.isAuth}
+                    price={price}
+                    disabled={!isPurchasable(ingredients)}
+                    isAuth={isAuth}
                     order={toggleModal} />
             </Aux>
         ) : <Spinner />
@@ -77,24 +93,4 @@ const burgerBuilder = props => {
     )
 }
 
-const mapStoreToProps = state => {
-    return {
-        ingredients: state.burgerBuilder.ingredients,
-        price: state.burgerBuilder.price,
-        error: state.burgerBuilder.error,
-        isAuth: !!state.auth.token,
-    }
-}
-
-const mapDispatchToProps = dispatch => {
-    return {
-        addIngredient: (ingredient) => dispatch(actions.addIngredient(ingredient)),
-        removeIngredient: (ingredient) => dispatch(actions.removeIngredient(ingredient)),
-        initIngredients: () => dispatch(actions.initIngredients()),
-        onInitPurchase: () => dispatch(actions.purchaseInit()),
-        onSetAuthRedirectPath: (path) => dispatch(actions.setAuthRedirectPath(path)),
-        onSubmitIngredients: () => dispatch(actions.submitIngredients()),
-    }
-}
-
-export default connect(mapStoreToProps, mapDispatchToProps)(withErrorHandler(burgerBuilder, axios));
+export default withErrorHandler(burgerBuilder, axios);
