@@ -1,4 +1,4 @@
-import React, { Component, Suspense, useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import Layout from './hoc/Layout/Layout';
 import BurgerBuilder from './containers/BurgerBuilder/BurgerBuilder';
 import { BrowserRouter, Route, Redirect, Switch } from 'react-router-dom';
@@ -19,7 +19,7 @@ const app = props => {
   let routes = (
     <Switch>
       <Route path="/build" component={BurgerBuilder} />
-      <Route path="/login" component={Auth} />
+      <Route path="/login" render={() => <Auth />} />
       <Redirect from='/' to="build" />
     </Switch>
   );
@@ -28,10 +28,10 @@ const app = props => {
     routes = (
       <Switch>
         <Route path="/build" component={BurgerBuilder} />
-        <Route path="/checkout" component={Checkout} />
-        <Route path="/orders" component={Orders} />
-        <Route path="/login" component={Auth} />
-        <Route path="/logout" component={Logout} />
+        <Route path="/checkout" render={() => <Checkout />} />
+        <Route path="/orders" render={() => <Orders />} />
+        <Route path="/login" render={() => <Auth />} />
+        <Route path="/logout" render={() => <Logout />} />
         <Redirect from='/' to="build" />
       </Switch>
     )
@@ -41,7 +41,7 @@ const app = props => {
     <BrowserRouter>
       <div>
         <Layout>
-          <Suspense fallback={Spinner}>
+          <Suspense fallback={<Spinner />}>
             {routes}
           </Suspense>
         </Layout>
