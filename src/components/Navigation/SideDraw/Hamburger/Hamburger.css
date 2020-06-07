@@ -1,0 +1,46 @@
+.Hamburger {
+    width: 30px;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.Hamburger:hover {
+    background-color: #8f5c2c;
+}
+
+.Hamburger .Line {
+    position: relative;
+    width: 100%;
+    height: 4px;
+    background-color: #fff;
+    border-radius: 2px;
+}
+
+.Hamburger .Line::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background-color: #fff;
+}
+
+.Hamburger .Line::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background-color: #fff;
+}
+
+@media (min-width: 500px) {
+    .Hamburger {
+        display: none;
+    }
+}
